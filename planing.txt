@@ -1,0 +1,43 @@
+voting application
+what?
+A functinality where user can vote to the given set of electors
+
+model?
+Routes?
+
+voting functionality
+1. user can sign in/sign up
+2. see the list of electors
+3. user can vote to the electors,after volting user cant vote again.
+4. there is a route which shows list of the electors and there vote count sorted by their vote count order.
+5. user must have unique government identity to vote.
+6. there should be one admin who can only maintain the table of electors and he cant vote.
+7. user can change the password 
+8. user can sing with adhar with adhar no and password.
+9. user can sign out
+
+----------------------------------------------
+Routes:
+user authentication 
+/signin
+/signup
+/signout
+/change-password
+/forgot-password
+/reset-password
+
+user voting
+/electors-get the list of electors 
+/vote/:electors : POST vote for the specific elector
+
+vote count
+/vote/count : GET vote count of all electors
+
+user profile
+/profile : GET user profile
+/profile/password : POST update user profile
+
+admin
+/elector : POST add new elector
+/elector/:id : DELETE delete elector
+/elector/:id : PUT update elector
