@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Vote, LogOut, User } from 'lucide-react';
+import { Vote, LogOut, User, LayoutDashboard, Shield } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -20,15 +20,27 @@ const Navbar = () => {
       <div className="nav-links">
         {user ? (
           <>
-            <Link to="/profile" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <User size={18} /> Profile ({user.role})
+            {user.role === 'admin' ? (
+              <Link to="/admin" className="nav-link">
+                <LayoutDashboard size={18} /> Dashboard
+              </Link>
+            ) : (
+              <Link to="/dashboard" className="nav-link">
+                <LayoutDashboard size={18} /> Dashboard
+              </Link>
+            )}
+            <Link to="/profile" className="nav-link">
+              <User size={18} /> Profile
             </Link>
-            <button onClick={handleLogout} className="btn-secondary btn-small" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span className="role-badge">
+              {user.role === 'admin' ? <><Shield size={14} /> Admin</> : `🗳️ Voter`}
+            </span>
+            <button onClick={handleLogout} className="btn-logout">
               <LogOut size={16} /> Logout
             </button>
           </>
         ) : (
-          <span className="nav-link" style={{ color: 'var(--primary-color)' }}>Secure Voting Portal</span>
+          <span className="nav-tagline">Secure Digital Elections</span>
         )}
       </div>
     </nav>

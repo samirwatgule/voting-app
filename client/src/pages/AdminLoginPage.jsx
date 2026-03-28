@@ -2,11 +2,10 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { LogIn, UserPlus, Vote, Eye, EyeOff } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff } from 'lucide-react';
 
-const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [aadhar, setAadhar] = useState('');
+const AdminLoginPage = () => {
+  const [adminId, setAdminId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -24,27 +23,21 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!aadhar || !password) {
+    if (!adminId || !password) {
       return setError('Please fill all fields');
-    }
-
-    if (!/^\d{12}$/.test(aadhar)) {
-      return setError('Aadhar Card must be exactly 12 digits');
     }
 
     setLoading(true);
     setError('');
 
     try {
-      const endpoint = isLogin ? '/users/signin' : '/users/signup';
-      const { data } = await axios.post(endpoint, {
-        aadharCardNumber: aadhar,
+      const { data } = await axios.post('/users/admin-signin', {
+        adminId,
         password,
       });
-
       login(data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.response?.data?.message || 'Invalid admin credentials');
     } finally {
       setLoading(false);
     }
@@ -53,25 +46,22 @@ const AuthPage = () => {
   return (
     <div className="auth-container">
       <div className="glass-card auth-card">
-        <div className="auth-icon voter-icon">
-          <Vote size={40} />
+        <div className="auth-icon admin-icon">
+          <Shield size={40} />
         </div>
-        <h2 className="auth-title">{isLogin ? 'Voter Sign In' : 'Voter Registration'}</h2>
-        <p className="auth-subtitle">
-          {isLogin ? 'Access your voting dashboard' : 'Register with your Aadhar number'}
-        </p>
+        <h2 className="auth-title">Admin Portal</h2>
+        <p className="auth-subtitle">Authorized personnel only</p>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Aadhar Number</label>
+            <label>Admin ID</label>
             <input
               type="text"
-              placeholder="Enter 12-digit Aadhar number"
-              value={aadhar}
-              onChange={(e) => setAadhar(e.target.value)}
-              maxLength={12}
+              placeholder="Enter Admin ID"
+              value={adminId}
+              onChange={(e) => setAdminId(e.target.value)}
             />
           </div>
           <div className="input-group">
@@ -92,31 +82,15 @@ const AuthPage = () => {
               </button>
             </div>
           </div>
-          <button type="submit" className="btn" style={{ width: '100%' }} disabled={loading}>
-            {loading
-              ? 'Please wait...'
-              : isLogin
-              ? <><LogIn size={18} /> Login</>
-              : <><UserPlus size={18} /> Register</>
-            }
+          <button type="submit" className="btn btn-admin" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Authenticating...' : <><Lock size={18} /> Admin Sign In</>}
           </button>
         </form>
 
         <p className="auth-footer">
-          {isLogin ? "Don't have an account? " : 'Already registered? '}
-          <span
-            className="auth-link"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError('');
-            }}
-          >
-            {isLogin ? 'Sign up' : 'Sign in'}
-          </span>
-        </p>
-        <p className="auth-footer" style={{ marginTop: '0.5rem' }}>
-          <Link to="/admin-login" className="auth-link admin-link-text">
-            🛡️ Admin Login
+          Are you a voter?{' '}
+          <Link to="/login" className="auth-link">
+            Voter Login
           </Link>
         </p>
       </div>
@@ -124,4 +98,4 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+export default AdminLoginPage;
