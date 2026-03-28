@@ -11,13 +11,23 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
+// @desc    Register a new voter
 // @route   POST /api/users/signup
 // @access  Public
 router.post('/signup', async (req, res) => {
   const { aadharCardNumber, password } = req.body;
 
   try {
+    // Block admin registration through signup
+    if (!aadharCardNumber || !password) {
+      return res.status(400).json({ message: 'Please provide Aadhar number and password' });
+    }
+
+    // Validate 12-digit Aadhar
+    if (!/^\d{12}$/.test(aadharCardNumber)) {
+      return res.status(400).json({ message: 'Aadhar Card must be exactly 12 digits' });
+    }
+
     const userExists = await User.findOne({ aadharCardNumber });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists with this Aadhar number' });
@@ -26,6 +36,7 @@ router.post('/signup', async (req, res) => {
     const user = await User.create({
       aadharCardNumber,
       password,
+      role: 'voter',
     });
 
     if (user) {
@@ -44,7 +55,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// @desc    Auth user & get token
+// @desc    Voter Sign In (rejects admin accounts)
 // @route   POST /api/users/signin
 // @access  Public
 router.post('/signin', async (req, res) => {
@@ -53,7 +64,16 @@ router.post('/signin', async (req, res) => {
   try {
     const user = await User.findOne({ aadharCardNumber });
 
-    if (user && (await user.comparePassword(password))) {
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid Aadhar credentials or password' });
+    }
+
+    // Block admin from voter login
+    if (user.role === 'admin') {
+      return res.status(403).json({ message: 'Admin accounts must use the Admin Login portal' });
+    }
+
+    if (await user.comparePassword(password)) {
       res.json({
         _id: user._id,
         aadharCardNumber: user.aadharCardNumber,
@@ -63,6 +83,40 @@ router.post('/signin', async (req, res) => {
       });
     } else {
       res.status(401).json({ message: 'Invalid Aadhar credentials or password' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Admin Sign In (separate route, rejects voter accounts)
+// @route   POST /api/users/admin-signin
+// @access  Public
+router.post('/admin-signin', async (req, res) => {
+  const { adminId, password } = req.body;
+
+  try {
+    const user = await User.findOne({ aadharCardNumber: adminId });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid admin credentials' });
+    }
+
+    // Only allow admin role
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. This portal is for administrators only.' });
+    }
+
+    if (await user.comparePassword(password)) {
+      res.json({
+        _id: user._id,
+        aadharCardNumber: user.aadharCardNumber,
+        role: user.role,
+        isVoted: user.isVoted,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid admin credentials' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
