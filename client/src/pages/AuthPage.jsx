@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { LogIn, UserPlus, Vote, Eye, EyeOff } from 'lucide-react';
@@ -54,7 +54,7 @@ const AuthPage = () => {
     <div className="auth-container">
       <div className="glass-card auth-card">
         <div className="auth-icon voter-icon">
-          <Vote size={40} />
+          <Vote size={36} />
         </div>
         <h2 className="auth-title">{isLogin ? 'Voter Sign In' : 'Voter Registration'}</h2>
         <p className="auth-subtitle">
@@ -113,11 +113,6 @@ const AuthPage = () => {
           >
             {isLogin ? 'Sign up' : 'Sign in'}
           </span>
-        </p>
-        <p className="auth-footer" style={{ marginTop: '0.5rem' }}>
-          <Link to="/admin-login" className="auth-link admin-link-text">
-            🛡️ Admin Login
-          </Link>
         </p>
       </div>
     </div>
